@@ -13,6 +13,7 @@ int main(int argc, char *argv[]) {
     int pktsinq = 0, bytesinq = 0;
     int maxpkts = 0, maxbytes = 0;
     int size= 0, sizes[MAX_BUFFER_SIZE] = {0};
+    float Total_Q_time = 0;
 
     float arrival;
     int bytes_in;
@@ -34,7 +35,6 @@ int main(int argc, char *argv[]) {
         while(fgetc(fp) != '\n')
         {
             fscanf(fp, "%f %d", &arrival, &bytes_in);
-
             bytesin += bytes_in;
             pktin++;
 
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
                 {
                     pktsinq++;
                     bytesinq += bytes_in;
+                    Total_Q_time += next_check_time - arrival;
                 }
             }
 
@@ -61,6 +62,9 @@ int main(int argc, char *argv[]) {
                 printf("Total Bytes Dropped for the last second: %d\n", byteloss);
                 printf("Total Packets in the queue for the last second: %d\n", pktsinq);
                 printf("Total Bytes in the queue for the last second: %d\n", bytesinq);
+                printf("Percentage of lost packets = %f \n", (float)pktloss/pktin);
+                printf("Percentage of lost bytes = %f \n", (float)byteloss/bytesin);
+                printf("Average Queue Time = %f \n", (float)Total_Q_time/pktsinq);
                 printf("\n");
                 bytesin = bytesinq; // Queued packets are counted in the next second
                 pktin = 0;
@@ -70,12 +74,6 @@ int main(int argc, char *argv[]) {
                 bytesinq = 0;
             }
         }
-
     }
-
-
     return 0;
 }
-
-
-
