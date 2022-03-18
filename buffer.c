@@ -1,10 +1,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "buffer.h"
 
-
-
+#define MAX_BUFFER_SIZE 100
+#define MAX_OUTPUT_LINK_CAPACITY (6000000 >>3) // 3Mb/8
 
 int main(int argc, char *argv[]) {
     float now = 0, prev = 0, elapsed = 0;
