@@ -13,6 +13,7 @@ int main(int argc, char *argv[]) {
     int maxpkts = 0, maxbytes = 0;
     int size= 0, sizes[MAX_BUFFER_SIZE] = {0};
     float Total_Q_time = 0;
+    char currentline[100];
 
     float arrival;
     int bytes_in;
@@ -29,49 +30,47 @@ int main(int argc, char *argv[]) {
     }
 
     int next_check_time = 1;
-    while (!feof(fp))
+    while (fgets(currentline, sizeof(currentline), fp) != NULL) 
     {
-        while(fgetc(fp) != '\n')
+        sscanf(currentline, "%f %d", &arrival, &bytes_in);
+
+        bytesin += bytes_in;
+        pktin++;
+
+        if (bytesin > MAX_OUTPUT_LINK_CAPACITY)
         {
-            fscanf(fp, "%f %d", &arrival, &bytes_in);
-            bytesin += bytes_in;
-            pktin++;
-
-            if (bytesin > MAX_OUTPUT_LINK_CAPACITY)
+            if (pktsinq > MAX_BUFFER_SIZE)
             {
-                if (pktsinq > MAX_BUFFER_SIZE)
-                {
-                    pktloss++;
-                    byteloss += bytes_in;
-                }
-                else
-                {
-                    pktsinq++;
-                    bytesinq += bytes_in;
-                    Total_Q_time += next_check_time - arrival;
-                }
+                pktloss++;
+                byteloss += bytes_in;
             }
-
-            if (arrival >= next_check_time)
+            else
             {
-                next_check_time += 1;
-                printf("Total Bytes Received for the last second: %d\n", bytesin);
-                printf("Total Packets Received for the last second: %d\n", pktin);
-                printf("Total Packets Dropped for the last second: %d\n", pktloss);
-                printf("Total Bytes Dropped for the last second: %d\n", byteloss);
-                printf("Total Packets in the queue for the last second: %d\n", pktsinq);
-                printf("Total Bytes in the queue for the last second: %d\n", bytesinq);
-                printf("Percentage of lost packets = %f \n", (float)pktloss/pktin);
-                printf("Percentage of lost bytes = %f \n", (float)byteloss/bytesin);
-                printf("Average Queue Time = %f \n", (float)Total_Q_time/pktsinq);
-                printf("\n");
-                bytesin = bytesinq; // Queued packets are counted in the next second
-                pktin = 0;
-                pktloss = 0;
-                byteloss = 0;
-                pktsinq = 0;
-                bytesinq = 0;
+                pktsinq++;
+                bytesinq += bytes_in;
+                Total_Q_time += next_check_time - arrival;
             }
+        }
+
+        if (arrival >= next_check_time)
+        {
+            next_check_time += 1;
+            printf("Total Bytes Received for the last second: %d\n", bytesin);
+            printf("Total Packets Received for the last second: %d\n", pktin);
+            printf("Total Packets Dropped for the last second: %d\n", pktloss);
+            printf("Total Bytes Dropped for the last second: %d\n", byteloss);
+            printf("Total Packets in the queue for the last second: %d\n", pktsinq);
+            printf("Total Bytes in the queue for the last second: %d\n", bytesinq);
+            printf("Percentage of lost packets = %f \n", (float)pktloss/pktin);
+            printf("Percentage of lost bytes = %f \n", (float)byteloss/bytesin);
+            printf("Average Queue Time = %f \n", pktsinq > 0 ? (float)Total_Q_time/pktsinq : 0);
+            printf("\n");
+            bytesin = bytesinq; // Queued packets are counted in the next second
+            pktin = 0;
+            pktloss = 0;
+            byteloss = 0;
+            pktsinq = 0;
+            bytesinq = 0;
         }
     }
     return 0;
