@@ -15,6 +15,13 @@ int main(int argc, char *argv[]) {
     float Total_Q_time = 0;
     char currentline[100];
 
+    float over_all_avg_q_delay = 0;
+    float over_all_avg_q_size = 0;
+    int over_all_received_packets = 0;
+    int over_all_received_bytes = 0;
+    int over_all_dropped_packets = 0;
+    int over_all_dropped_bytes = 0;
+
     float arrival;
     int bytes_in;
 
@@ -66,12 +73,32 @@ int main(int argc, char *argv[]) {
             printf("Average Queue Time = %f \n", pktsinq > 0 ? (float)Total_Q_time/pktsinq : 0);
             printf("\n");
             bytesin = bytesinq; // Queued packets are counted in the next second
+
+            over_all_avg_q_delay += Total_Q_time;
+            over_all_avg_q_size += pktsinq;
+            over_all_received_packets += pktin;
+            over_all_received_bytes += bytesin;
+            over_all_dropped_packets += pktloss;
+            over_all_dropped_bytes += byteloss;
+
             pktin = 0;
             pktloss = 0;
             byteloss = 0;
             pktsinq = 0;
             bytesinq = 0;
+            Total_Q_time = 0;
         }
     }
+
+    printf("\n\n\n");
+    printf("Total Bytes Received : %d\n", over_all_received_bytes);
+    printf("Total Packets Received : %d\n", over_all_received_packets);
+    printf("Total Packets Dropped : %d\n", over_all_dropped_packets);
+    printf("Total Bytes Dropped : %d\n", over_all_dropped_bytes);
+    printf("Total Packets in the queue : %f\n", over_all_avg_q_size);
+    printf("Percentage of lost packets = %f \n", (float)over_all_dropped_packets/over_all_received_packets);
+    printf("Percentage of lost bytes = %f \n", (float)over_all_dropped_bytes/over_all_received_bytes);
+    printf("Average Queue Time = %f \n", (float)over_all_avg_q_delay/over_all_avg_q_size);
+
     return 0;
 }
