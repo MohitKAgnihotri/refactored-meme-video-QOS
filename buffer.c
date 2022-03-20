@@ -37,29 +37,38 @@ int main(int argc, char *argv[]) {
     }
 
     int next_check_time = 1;
+
+    /* Read and process the file line by line
+     */
     while (fgets(currentline, sizeof(currentline), fp) != NULL) 
     {
+        /* Read the time and the size of the packet
+         * */
         sscanf(currentline, "%f %d", &arrival, &bytes_in);
 
+        /* Update the statistics
+         * */
         bytesin += bytes_in;
         pktin++;
 
+        /* Check if the incoming packets capacity is exceeded
+         * */
         if (bytesin > MAX_OUTPUT_LINK_CAPACITY)
         {
             if (pktsinq > MAX_BUFFER_SIZE)
             {
-                pktloss++;
-                byteloss += bytes_in;
+                pktloss++; // Packet loss
+                byteloss += bytes_in; // Bytes lost
             }
-            else
+            else /* if there is space in the queue */
             {
-                pktsinq++;
-                bytesinq += bytes_in;
-                Total_Q_time += next_check_time - arrival;
+                pktsinq++; // Packet enqueued
+                bytesinq += bytes_in; // Bytes in queue
+                Total_Q_time += next_check_time - arrival; // Time in the queue
             }
         }
 
-        if (arrival >= next_check_time)
+        if (arrival >= next_check_time) // Update the statistics
         {
             next_check_time += 1;
             printf("Total Bytes Received for the last second: %d\n", bytesin);
@@ -89,6 +98,8 @@ int main(int argc, char *argv[]) {
             Total_Q_time = 0;
         }
     }
+
+    /*Compute and print the statistics */
 
     printf("\n\n\n");
     printf("Total Bytes Received : %d\n", over_all_received_bytes);
